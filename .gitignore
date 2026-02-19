@@ -1,0 +1,6 @@
+Mental Health Classification.csv
+*.pkl
+__pycache__/
+.env
+varmodels/
+*.png

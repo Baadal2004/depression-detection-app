@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health AI - Depression Predictor</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <!-- React & Framer Motion CDNs -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+
+    <!-- Unified Styles -->
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --secondary: #64748b;
+            --bg-dark: #0f172a;
+            --glass: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --text-white: #f8fafc;
+            --text-dim: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-white);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Animated Background */
+        .background-blobs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .blob {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            animation: move 20s infinite alternate;
+        }
+
+        .blob-1 {
+            background: #4f46e5;
+            top: -100px;
+            left: -100px;
+        }
+
+        .blob-2 {
+            background: #7c3aed;
+            bottom: -100px;
+            right: -100px;
+            animation-delay: -5s;
+        }
+
+        @keyframes move {
+            from {
+                transform: translate(0, 0) scale(1);
+            }
+
+            to {
+                transform: translate(100px, 50px) scale(1.1);
+            }
+        }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: var(--text-white);
+            margin-bottom: 12px;
+        }
+
+        p {
+            color: var(--text-dim);
+            margin-bottom: 20px;
+        }
+
+        .question-label {
+            display: block;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: 400;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            color: white;
+            font-size: 1.1rem;
+            outline: none;
+            margin-bottom: 20px;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        select option {
+            background-color: var(--bg-dark);
+            color: white;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 16px 28px;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .primary-btn {
+            background: var(--primary);
+            color: white;
+            flex: 2;
+        }
+
+        .primary-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .secondary-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            flex: 1;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .radio-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .radio-box.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .suggestion-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .suggestion-card h4 {
+            color: var(--primary);
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .suggestion-card ul {
+            padding-left: 20px;
+            color: var(--text-dim);
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        {% raw %}
+        const { useState, useEffect } = React;
+        const { motion, AnimatePresence } = Motion;
+
+        const questions = [
+            { id: "Gender", label: "Select Gender", type: "select", options: { "Male": 1, "Female": 0 } },
+            { id: "Age", label: "How old are you?", type: "number", min: 1, max: 100, default: 25 },
+            { id: "Education_Level", label: "Education Level", type: "select", options: { "High School": 0, "Bachelors": 1, "Masters": 2, "PhD": 3 } },
+            { id: "Employment_Status", label: "Employment Status", type: "select", options: { "Unemployed": 0, "Part-time": 1, "Full-time": 2, "Student": 3, "Retired": 4 } },
+            { id: "Depression_Type", label: "Existing/Prior Diagnosis?", type: "select", options: { "None / Not Applicable": 0, "Major Depressive": 0, "Bipolar": 2, "Atypical": 7, "Situational": 9 } },
+            { id: "Symptoms", label: "Identify your Primary Symptom", type: "select", options: { "None / Not Applicable": 0, "Persistent Sadness": 0, "Fatigue": 4, "Anxiety": 9, "Sleep Disturbances": 3 } },
+            { id: "Depression_Score", label: "Self-assessed Depression Score (0-30)", type: "number", min: 0, max: 30, default: 10 },
+            { id: "Low_Energy", label: "Frequently feeling Low Energy?", type: "radio", options: { "Yes": 1, "No": 0 } },
+            { id: "Low_SelfEsteem", label: "Feeling of Low Self-Esteem?", type: "radio", options: { "Yes": 1, "No": 0 } },
+            { id: "Worsening_Depression", label: "Is it worsening recently?", type: "radio", options: { "Yes": 1, "No": 0 } },
+            { id: "Sleep_Hours", label: "Average Sleep Hours per night", type: "number", min: 0, max: 15, default: 7 },
+            { id: "SocialMedia_Hours", label: "Social Media usage (Hours/Day)", type: "number", min: 0, max: 24, default: 3 },
+            { id: "How many times you eat ", label: "Daily Eating Habits", type: "select", options: { "Irregularly": 0, "Regularly": 1 } },
+            { id: "Your overeating level", label: "Overeating level (0-12)", type: "number", min: 0, max: 12, default: 5 },
+            { id: "SocialMedia_WhileEating", label: "Social Media while eating?", type: "select", options: { "Never": 0, "Rarely": 1, "Frequently": 2, "Always": 3 } },
+            { id: "Nervous_Level", label: "Nervousness Level (0-10)", type: "number", min: 0, max: 10, default: 5 },
+            { id: "Search_Depression_Online", label: "Search about Depression online?", type: "radio", options: { "Yes": 1, "No": 0 } },
+            { id: "Coping_Methods", label: "Usual Coping Method", type: "select", options: { "Exercise": 0, "Music": 1, "Reading": 2, "Friends/Family": 4, "Talking": 4, "Relaxation": 11 } },
+            { id: "Mental_Health_Support", label: "Access to Mental Health Support?", type: "radio", options: { "Yes": 1, "No": 0 } },
+            { id: "Self_Harm", label: "Current thoughts of Self-Harm?", type: "radio", options: { "Yes": 1, "No": 0 } },
+            { id: "Suicide_Attempts", label: "Previous suicide attempts (count)", type: "number", min: 0, max: 5, default: 0 }
+        ];
+
+        function App() {
+            const [view, setView] = useState("start"); // start, quiz, loading, results
+            const [step, setStep] = useState(0);
+            const [data, setData] = useState({});
+            const [result, setResult] = useState(null);
+
+            const handleStart = () => {
+                const initialData = {};
+                questions.forEach(q => initialData[q.id] = q.default !== undefined ? q.default : Object.values(q.options || {})[0]);
+                setData(initialData);
+                setView("quiz");
+            };
+
+            const handleNext = () => {
+                if (step < questions.length - 1) setStep(step + 1);
+                else handleSubmit();
+            };
+
+            const handlePrev = () => { if (step > 0) setStep(step - 1); };
+
+            const handleSubmit = async () => {
+                setView("loading");
+                try {
+                    const res = await fetch("/predict", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(data)
+                    });
+                    const resultData = await res.json();
+                    setResult(resultData);
+                    setView("results");
+                } catch (err) {
+                    alert("Connection Error. Please check Flask server.");
+                    setView("quiz");
+                }
+            };
+
+            const updateValue = (id, val) => setData(prev => ({ ...prev, [id]: val }));
+
+            return (
+                <div className="glass-card">
+                    <AnimatePresence mode="wait">
+                        {view === "start" && (
+                            <motion.div key="start" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                                <h1>Depression <span>AI Assistant</span></h1>
+                                <p>Take a professional assessment using our Random Forest AI model. We'll identify signs of depression and provide clinical recovery suggestions.</p>
+                                <button className="primary-btn" onClick={handleStart} style={{ width: '100%' }}>Begin Professional Assessment</button>
+                            </motion.div>
+                        )}
+
+                        {view === "quiz" && (
+                            <motion.div key="quiz" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                                <div className="progress-bar">
+                                    <div className="progress-fill" style={{ width: `${((step + 1) / questions.length) * 100}%` }}></div>
+                                </div>
+                                <p style={{ fontSize: '0.9rem', marginBottom: '10px' }}>Step {step + 1} of {questions.length}</p>
+
+                                <div className="question-container">
+                                    <label className="question-label">{questions[step].label}</label>
+
+                                    {questions[step].type === "select" && (
+                                        <select value={data[questions[step].id]} onChange={e => updateValue(questions[step].id, parseInt(e.target.value))}>
+                                            {Object.entries(questions[step].options).map(([lbl, val]) => (
+                                                <option key={lbl} value={val}>{lbl}</option>
+                                            ))}
+                                        </select>
+                                    )}
+
+                                    {questions[step].type === "number" && (
+                                        <input type="number"
+                                            value={data[questions[step].id]}
+                                            onChange={e => updateValue(questions[step].id, parseFloat(e.target.value))} />
+                                    )}
+
+                                    {questions[step].type === "radio" && (
+                                        <div className="options-grid">
+                                            {Object.entries(questions[step].options).map(([lbl, val]) => (
+                                                <div key={lbl}
+                                                    className={`radio-box ${data[questions[step].id] === val ? 'active' : ''}`}
+                                                    onClick={() => updateValue(questions[step].id, val)}>
+                                                    {lbl}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="btn-container">
+                                    {step > 0 && <button className="secondary-btn" onClick={handlePrev}>Back</button>}
+                                    <button className="primary-btn" onClick={handleNext}>
+                                        {step === questions.length - 1 ? "Submit Assessment" : "Next Question"}
+                                    </button>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {view === "loading" && (
+                            <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="center" style={{ textAlign: 'center' }}>
+                                <div className="loader"></div>
+                                <h3>Analyzing Biological & Lifestyle Data...</h3>
+                                <p>Our model is processing your inputs to generated clinical insights.</p>
+                            </motion.div>
+                        )}
+
+                        {view === "results" && result && (
+                            <motion.div key="results" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+                                <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+                                    <h2 style={{ fontSize: '2.2rem', color: result.is_depressed ? 'var(--danger)' : 'var(--success)' }}>
+                                        {result.is_depressed ? "Depression Signs Detected" : "No Significant Signs"}
+                                    </h2>
+                                    <p>AI Confidence Score: {(result.probability * 100).toFixed(1)}%</p>
+                                    {result.is_depressed && (
+                                        <div style={{ background: 'rgba(99,102,241,0.2)', color: 'var(--primary)', padding: '10px 20px', borderRadius: '30px', display: 'inline-block', fontWeight: '600' }}>
+                                            Potential Type: {result.potential_type}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <h3>Recommended Recovery Actions:</h3>
+                                {result.suggestions.map((s, i) => (
+                                    <div key={i} className="suggestion-card">
+                                        <h4>{s.title}</h4>
+                                        <ul>{s.tips.map((t, j) => <li key={j}>{t}</li>)}</ul>
+                                    </div>
+                                ))}
+
+                                <button className="secondary-btn" onClick={() => setView("start")} style={{ width: '100%', marginTop: '20px' }}>
+                                    Restart New Assessment
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+        {% endraw %}
+    </script>
+</body>
+
+</html>
