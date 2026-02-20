@@ -56,4 +56,5 @@ urlpatterns = [
     path('hospital/doctor/book-slot/', views.book_hospital_doctor_slot, name='book_hospital_doctor_slot'),
     path('user/<int:user_id>/hospital/bookings/', views.user_view_booking_hospital.as_view(), name='user_view_hospital_bookings'),
     path('hospital/doctor/<int:doctor_id>/bookings/', views.doctor_view_booking_hospital.as_view(), name='doctor_view_booking_hospital'),
+    path('hospital/booking/<int:booking_id>/update-status/', views.update_hospital_booking_status, name='update_hospital_booking_status'),
 ]

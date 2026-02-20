@@ -214,17 +214,11 @@ String convertTo24HourNoSuffix(String time) {
               setState(() => isloading = false);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text("Registration Successful"),
+                  content: Text("Slots Created Successfully"),
                   backgroundColor: Colors.green,
                 ),
               );
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) {
-                    return  HospaitalDocHomeScreen(doctorId: doctorId!,);
-                  },
-                ),
-              );
+              Navigator.of(context).pop(); // Go back to home
             },
             error: (error) {
               setState(() => isloading = false);

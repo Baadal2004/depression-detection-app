@@ -6,6 +6,7 @@ import 'package:serene_space_project/authentication/doctor_authentication/regist
 import 'package:serene_space_project/authentication/patient/login_screen/bloc/login_screen_bloc.dart';
 import 'package:serene_space_project/hospital_doctor_screen/hospital_home_screen/hospital_home_screen.dart';
 import 'package:serene_space_project/other_screen/role_wise.dart';
+import 'package:serene_space_project/patient_screen/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DoctorLoginScreen extends StatefulWidget {
@@ -200,15 +201,19 @@ Widget _buildPasswordField(
                       backgroundColor: Colors.green,
                     ),
                   );
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) {
-                        return
-                        // ChatScreen(userId: userId!);
-                        HospaitalDocHomeScreen(doctorId: doctorId!,);
-                      },
-                    ),
-                  );
+                  if (response.role.toLowerCase().contains('doctor')) {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => HospaitalDocHomeScreen(doctorId: doctorId!),
+                      ),
+                    );
+                  } else {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => HomeScreen(userId: doctorId!),
+                      ),
+                    );
+                  }
                 });
               },
               error: (error) {

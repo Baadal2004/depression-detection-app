@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:serene_space_project/screens/menstrual_track/input_cycle/bloc/input_cycle_bloc.dart';
+import 'package:serene_space_project/screens/menstrual_track/input_cycle/habit_tracker_screen.dart';
 
 class PeriodInputScreen extends StatefulWidget {
   const PeriodInputScreen({super.key, required this.userId, this.name = ''});
@@ -101,6 +102,21 @@ class _PeriodInputScreenState extends State<PeriodInputScreen> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => HabitTrackerScreen(
+                      isAdhdDetected: false,
+                      userId: userId!,
+                    ),
+                  ),
+                );
+              },
+              child: const Text("Habit Tracker & Suggestions"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
                  Navigator.pop(context);  // close first dialog
               },
               child: const Text("OK"),
@@ -122,6 +138,21 @@ class _PeriodInputScreenState extends State<PeriodInputScreen> {
             "Don’t worry. ADHD can be managed with proper lifestyle changes.",
           ),
           actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // close first dialog
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => HabitTrackerScreen(
+                      isAdhdDetected: true,
+                      userId: userId!,
+                    ),
+                  ),
+                );
+              },
+              child: const Text("Habit Tracker & Suggestions"),
+            ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context); // close first dialog
@@ -183,14 +214,32 @@ class _PeriodInputScreenState extends State<PeriodInputScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          onPressed: () {},
-          icon: Icon(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: const Icon(
             Icons.arrow_back_sharp,
-            color: const Color.fromARGB(255, 177, 11, 66),
+            color: Color.fromARGB(255, 177, 11, 66),
           ),
         ),
-        title: Text('Period Cycle Details'),
+        title: const Text('ADHD Predictor'),
         backgroundColor: Colors.pink[100],
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HabitTrackerScreen(
+                    isAdhdDetected: false, // Default to false if accessed directly
+                    userId: userId!,
+                  ),
+                ),
+              );
+            },
+            icon: const Icon(Icons.track_changes, color: Color.fromARGB(255, 177, 11, 66)),
+          ),
+        ],
       ),
       body: BlocConsumer<InputCycleBloc, InputCycleState>(
         listener: (context, state) {

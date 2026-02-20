@@ -553,16 +553,25 @@ def view_nearby_hospital_doctors(request, user_id):
     if not user.place:
         return Response({"error": "User place not available"}, status=400)
 
-    # ✅ Only approved & available doctors in the same place
+    # ✅ Only approved & available doctors
     doctors = tbl_hospital_doctor_register.objects.filter(
-        status='approved', available=True, place__iexact=user.place
+        status='approved', available=True
     )
+    
+    # Try filtering by place first
+    nearby_doctors_query = doctors.filter(place__iexact=user.place)
+    
+    if nearby_doctors_query.exists():
+        doctors_to_show = nearby_doctors_query
+    else:
+        # Fallback: Show all approved/available if none in the specific place
+        doctors_to_show = doctors
 
-    if not doctors.exists():
-        return Response({"message": "No nearby hospital doctors found in your area."}, status=200)
+    if not doctors_to_show.exists():
+        return Response({"message": "No hospital doctors found."}, status=200)
 
     nearby_doctors = []
-    for doctor in doctors:
+    for doctor in doctors_to_show:
         nearby_doctors.append({
             "id": doctor.id,
             "name": doctor.name,
@@ -728,6 +737,20 @@ class doctor_view_booking_hospital(APIView):
                 # "booked_at": booking.created_at,
             })
         return Response(data, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def update_hospital_booking_status(request, booking_id):
+    try:
+        booking = HospitalBooking.objects.get(id=booking_id)
+        new_status = request.data.get('status')
+        if new_status not in ['approved', 'rejected']:
+            return Response({'message': 'Invalid status. Use "approved" or "rejected".'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        booking.status = new_status
+        booking.save()
+        return Response({'message': f'Booking {new_status} successfully'}, status=status.HTTP_200_OK)
+    except HospitalBooking.DoesNotExist:
+        return Response({'message': 'Booking not found'}, status=status.HTTP_404_NOT_FOUND)
     
 
 class UserViewBook(APIView):

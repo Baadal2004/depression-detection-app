@@ -5,7 +5,7 @@ import 'package:serene_space_project/authentication/patient/login_screen/login_v
 import 'package:serene_space_project/constant_uri.dart';
 import 'package:serene_space_project/patient_screen/home_screen.dart';
 import 'package:serene_space_project/patient_screen/list_nearbyhos_doc/list_nearbyhos_doc_view.dart';
-import 'package:serene_space_project/patient_screen/pcod_prediction/input_condition_datas.dart/input_condition_service.dart';
+// import 'package:serene_space_project/patient_screen/pcod_prediction/input_condition_datas.dart/input_condition_service.dart';
 import 'package:serene_space_project/screens/chatbot/chatbot.dart';
 import 'package:serene_space_project/utils/app_theme.dart';
 
@@ -245,9 +245,11 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
 
     try {
       final responseBody = await _callAdvancedPredict(widget.userId, answers);
+      if (!mounted) return;
       Navigator.pop(context);
       _showResultDialog(responseBody);
     } catch (e) {
+      if (!mounted) return;
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
     }
@@ -299,6 +301,18 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
           ),
         ),
         actions: [
+          if (isDepressed && prob > 70)
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => FindHosDoctorScreen(userId: widget.userId)),
+                );
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+              child: const Text("Book Doctor Appointment", style: TextStyle(color: Colors.white)),
+            ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);

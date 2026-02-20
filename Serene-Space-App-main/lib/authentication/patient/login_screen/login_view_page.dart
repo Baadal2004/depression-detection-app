@@ -9,6 +9,7 @@ import 'package:serene_space_project/patient_screen/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:typewritertext/typewritertext.dart';
 import 'package:serene_space_project/utils/app_theme.dart';
+import 'package:serene_space_project/hospital_doctor_screen/hospital_home_screen/hospital_home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -215,16 +216,21 @@ class _LoginScreenState extends State<LoginScreen>
                       backgroundColor: Colors.green,
                     ),
                   );
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) {
-                        return HomeScreen(userId: userId!);
-                        //HealthProfileScreen(userId: userId!);
-                        // ChatScreen(userId: userId!);
-                        // HomeScreen(userId: userId!);
-                      },
-                    ),
-                  );
+                  if (response.role.toLowerCase().contains('doctor')) {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => HospaitalDocHomeScreen(doctorId: userId!),
+                      ),
+                    );
+                  } else {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return HomeScreen(userId: userId!);
+                        },
+                      ),
+                    );
+                  }
                 });
               },
               error: (error) {

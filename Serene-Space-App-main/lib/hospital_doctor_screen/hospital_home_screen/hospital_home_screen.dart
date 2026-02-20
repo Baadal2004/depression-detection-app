@@ -5,6 +5,7 @@ import 'package:serene_space_project/authentication/patient/login_screen/login_v
 import 'package:serene_space_project/hospital_doctor_screen/dochospital_create/dochospital_create_slot.dart';
 import 'package:serene_space_project/hospital_doctor_screen/hospital_home_screen/view_patient_feedbacks.dart';
 import 'package:serene_space_project/hospital_doctor_screen/hospital_home_screen/view_user_booking.dart';
+import 'package:serene_space_project/hospital_doctor_screen/hospital_home_screen/doctor_dashboard.dart';
 
 class HospaitalDocHomeScreen extends StatefulWidget {
   const HospaitalDocHomeScreen({super.key,
@@ -97,42 +98,13 @@ class _HospaitalDocHomeScreenState extends State<HospaitalDocHomeScreen>
                height: 60,
                circleWidth: 60,
                activeIndex: tabIndex,
-               onTap: (index) {
-                 tabIndex = index;
-                 pageController.jumpToPage(tabIndex);
-                 if (index == 0) {
-                  // Navigate to My Booking page
-                   Navigator.of(context).push(
-                     MaterialPageRoute(
-                       builder: (context) => HospitalDoctorFeedbackPage(doctorId: doctorId!,),
-                     ),
-                   );
-                 }
-                 else if (index == 1) {
-                   // Navigate to Logout page OR perform logout then navigate
-                   Navigator.of(context).pushReplacement(
-                     MaterialPageRoute(builder: (context) => HosDoctorAppointmentsPage(doctorId: doctorId!,)),
-                   );
-                   // Or perform logout logic here then navigate
-                 } 
-                 else if (index == 2) {
-                  //  // Navigate to Logout page OR perform logout then navigate
-                  //  Navigator.of(context).pushReplacement(
-                  //    MaterialPageRoute(builder: (context) => DoctorViewAppointments(doctorId: doctorId!,)),
-                  //  );
-                   // Or perform logout logic here then navigate
-                 } else if (index == 3) {
-                   // Navigate to Logout page OR perform logout then navigate
-                   Navigator.of(context).pushReplacement(
-                     MaterialPageRoute(builder: (context) => HospitalBookAppointmentScreen(doctorId:doctorId!,)),
-                   );
-                   // Or perform logout logic here then navigate
-                 }
-                 else if (index == 4){
-                   _showLogoutDialog(context);
-                 }
-                 
-               },
+                onTap: (index) {
+                  tabIndex = index;
+                  pageController.jumpToPage(tabIndex);
+                  if (index == 4) {
+                    _showLogoutDialog(context);
+                  }
+                },
                padding: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
                cornerRadius: const BorderRadius.only(
                  topLeft: Radius.circular(8),
@@ -149,26 +121,11 @@ class _HospaitalDocHomeScreenState extends State<HospaitalDocHomeScreen>
                  tabIndex = v;
                },
                children: [
-                 Container(
-                   width: double.infinity,
-                   height: double.infinity,
-                   color: const Color.fromARGB(255, 158, 233, 225),
-                 ),
-                 Container(
-                   width: double.infinity,
-                   height: double.infinity,
-                   color: const Color.fromARGB(255, 180, 210, 235),
-                 ),
-                 Container(
-                   width: double.infinity,
-                   height: double.infinity,
-                   color: const Color.fromARGB(255, 162, 238, 209),
-                 ),
-                 Container(
-                   width: double.infinity,
-                   height: double.infinity,
-                   color: const Color.fromARGB(255, 158, 233, 225),
-                 ),
+                 HospitalDoctorFeedbackPage(doctorId: doctorId!), // index 0 (matching Nav)
+                 HosDoctorAppointmentsPage(doctorId: doctorId!), // index 1
+                 DoctorDashboard(doctorId: doctorId!),          // index 2 (Home)
+                 HospitalBookAppointmentScreen(doctorId: doctorId!), // index 3
+                Container(), // index 4 (Logout placeholder - handled by onTap)
                ],
              ),
            ),

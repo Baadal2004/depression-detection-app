@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:serene_space_project/constant_uri.dart';
 import 'package:serene_space_project/patient_screen/book_now_hos_screen/bloc/book_now_bloc.dart';
 import 'package:serene_space_project/patient_screen/feeback_hospage.dart';
+import 'package:serene_space_project/patient_screen/view_my_hosbooking.dart';
 
 class BookNowHosScreen extends StatefulWidget {
   const BookNowHosScreen({
@@ -75,6 +76,59 @@ class _BookNowHosScreenState extends State<BookNowHosScreen> {
     }
   }
 
+  void _showBookingSuccessDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Icon(Icons.check_circle, color: Colors.green, size: 60),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "Booking Done!",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              "Your appointment request has been sent to the doctor. You can track the approval status in 'My Appointments'.",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey),
+            ),
+          ],
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) {
+                    return HosDoctorAppointmentsPages(userId: userId!);
+                  },
+                ),
+              );
+            },
+            child: const Text("View My Appointments"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) {
+                    return HosFeedbackPage(userid: userId, doctorId: doctorId);
+                  },
+                ),
+              );
+            },
+            child: const Text("Give Feedback"),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> bookSlot() async {
     if (selectedGroupIndex == null || selectedTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -104,22 +158,7 @@ class _BookNowHosScreenState extends State<BookNowHosScreen> {
 
     if (response.statusCode == 201) {
       // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            ' Slot booked successfully!',
-            style: TextStyle(color: Colors.green),
-          ),
-        ),
-      );
-      // ignore: use_build_context_synchronously
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) {
-            return HosFeedbackPage(userid: userId, doctorId: doctorId);
-          },
-        ),
-      );
+      _showBookingSuccessDialog();
       debugPrint('Booking Response: $responseBody');
     } else {
       debugPrint(' Booking failed: ${response.body}');
@@ -227,53 +266,19 @@ class _BookNowHosScreenState extends State<BookNowHosScreen> {
                                 width: 2,
                               ),
                             ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  timeslot.time,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                    color: isSelected
-                                        ? const Color(0xFF2788F9)
-                                        : const Color(0xFF18214A),
-                                  ),
+                            child: Center(
+                              child: Text(
+                                timeslot.time,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: !isAvailable
+                                      ? Colors.grey
+                                      : (isSelected
+                                          ? const Color(0xFF2788F9)
+                                          : const Color(0xFF18214A)),
                                 ),
-                                const SizedBox(height: 8),
-                                isAvailable
-                                    ? ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: isSelected
-                                              ? const Color(0xFF2788F9)
-                                              : const Color(0xFFF1F6FF),
-                                          foregroundColor: isSelected
-                                              ? Colors.white
-                                              : const Color(0xFF2788F9),
-                                          elevation: 0,
-                                          shape: const StadiumBorder(),
-                                        ),
-                                        onPressed: () {
-                                          setState(() {
-                                            selectedSlotIndex = i;
-                                            selectedGroupIndex =
-                                                selectedDateIndex;
-                                            selectedTime = timeslot.time;
-                                          });
-                                        },
-                                        child: const Text("Available"),
-                                      )
-                                    : ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.red,
-                                          foregroundColor: Colors.grey,
-                                          elevation: 0,
-                                          shape: const StadiumBorder(),
-                                        ),
-                                        onPressed: null,
-                                        child: const Text("Unavailable"),
-                                      ),
-                              ],
+                              ),
                             ),
                           ),
                         );

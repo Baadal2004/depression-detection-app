@@ -42,7 +42,12 @@ class _FindHosDoctorScreenState extends State<FindHosDoctorScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        automaticallyImplyLeading: false,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+        ),
         title: Padding(
           padding: const EdgeInsets.only(top: 18.0, left: 8),
           child: Text(
@@ -70,12 +75,6 @@ class _FindHosDoctorScreenState extends State<FindHosDoctorScreen> {
             },
             success: (response) {
               setState(() => isloading = false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Registration Successful"),
-                  backgroundColor: Colors.green,
-                ),
-              );
               // Navigator.of(context).push(
               //   MaterialPageRoute(
               //     builder: (context) {
@@ -100,7 +99,37 @@ class _FindHosDoctorScreenState extends State<FindHosDoctorScreen> {
             loading: () => const Center(child: CircularProgressIndicator()),
             success: (doctors) {
               if (doctors.isEmpty) {
-                return const Center(child: Text("No doctors found nearby."));
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.person_search, size: 80, color: Colors.grey[400]),
+                        const SizedBox(height: 16),
+                        Text(
+                          "No Doctors Found Nearby",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "We couldn't find any approved doctors in your area. Please try again later or check back soon.",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: fetchClinicDoc,
+                          child: const Text("Retry Search"),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
               }
               return ListView.builder(
                 padding: const EdgeInsets.symmetric(
@@ -118,8 +147,19 @@ class _FindHosDoctorScreenState extends State<FindHosDoctorScreen> {
                 },
               );
             },
-            orElse: () =>
-                const Center(child: Text("Please search for doctors.")),
+            orElse: () => Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Please search for doctors."),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: fetchClinicDoc,
+                    child: const Text("Start Search"),
+                  ),
+                ],
+              ),
+            ),
           );
         },
       ),
@@ -279,7 +319,7 @@ class DoctorCard extends StatelessWidget {
                     ),
                   );
                 },
-                child: Text("View"),
+                child: Text("Book Now"),
               ),
             ),
           ],

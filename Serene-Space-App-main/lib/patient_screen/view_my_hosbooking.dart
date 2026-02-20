@@ -121,20 +121,12 @@ Future<void> fetchClinBookings() async {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 0,
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) {
-                    return HomeScreen(userId: userId!);
-                  },
-                ),
-              );
-            },
-            icon: Icon(Icons.arrow_back),
-          ),
-        ],
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: const Icon(Icons.arrow_back),
+        ),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -183,6 +175,28 @@ Future<void> fetchClinBookings() async {
                                   ),
                                 ),
                               ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: _getStatusColor(
+                                    appoint['status'] ?? 'booked',
+                                  ).withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  (appoint['status'] ?? 'booked').toUpperCase(),
+                                  style: TextStyle(
+                                    color: _getStatusColor(
+                                      appoint['status'] ?? 'booked',
+                                    ),
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                           const SizedBox(height: 10),
@@ -220,9 +234,6 @@ Future<void> fetchClinBookings() async {
                               ),
                             ],
                           ),
-                          // If you want to show doctor name:
-                          // const SizedBox(height: 4),
-                          // Text("Doctor: ${appoint['doctor_name']}")
                         ],
                       ),
                     ),
@@ -231,5 +242,17 @@ Future<void> fetchClinBookings() async {
               ),
             ),
     );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'approved':
+        return Colors.green;
+      case 'rejected':
+        return Colors.red;
+      case 'booked':
+      default:
+        return Colors.orange;
+    }
   }
 }
