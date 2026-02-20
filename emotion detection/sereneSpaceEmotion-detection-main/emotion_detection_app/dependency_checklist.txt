@@ -1,0 +1,55 @@
+============================================================
+EMOTIONAI: DEPENDENCY & INSTALLATION CHECKLIST
+============================================================
+
+To run the EmotionAI app properly from this repository, a 
+new user must ensure the following are installed and configured:
+
+1. FLUTTER SDK
+--------------
+- Version: 3.10.7 or higher
+- Download: https://docs.flutter.dev/get-started/install
+- Verification: Run `flutter --version` in your terminal.
+
+2. ANDROID SETUP (For Android users)
+------------------------------------
+- Android SDK Build-Tools
+- Android SDK Platform 31 or higher (Required for ML Kit)
+- A physical Android device or Emulator with Camera permissions enabled.
+- Min SDK Version: 21 (Android 5.0 Lollipop)
+
+3. IOS SETUP (For iOS users)
+----------------------------
+- Xcode (latest version)
+- CocoaPods (`sudo gem install cocoapods`)
+- Permission setting: NSCameraUsageDescription must be in Info.plist (Handled in code).
+
+4. PROJECT DEPENDENCIES
+-----------------------
+These will be automatically installed by Flutter, but you must 
+run the command below inside the 'emotion_detection_app' folder:
+- Command: `flutter pub get`
+
+Main packages used:
+- camera: For real-time video feed
+- tflite_flutter: For on-device AI inference
+- google_mlkit_face_detection: For high-speed face tracking
+- image: For image preprocessing
+
+5. ASSETS CHECK
+---------------
+Ensure the following file exists (should be included in the repo):
+- Path: `assets/model.tflite`
+- Purpose: This is the brain of the app. Without this, the app will crash on launch.
+
+6. FINAL VERIFICATION CMD
+--------------------------
+Run this to ensure your environment is 100% ready:
+- Command: `flutter doctor`
+
+============================================================
+HOW TO RUN:
+1. Connect device
+2. `flutter pub get`
+3. `flutter run`
+============================================================
