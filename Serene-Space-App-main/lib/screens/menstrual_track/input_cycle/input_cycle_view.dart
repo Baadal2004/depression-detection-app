@@ -427,7 +427,13 @@ class _PeriodInputScreenState extends State<PeriodInputScreen> {
                     labelText: "Average Sleep Hours (4–10)",
                     border: OutlineInputBorder(),
                   ),
-                  validator: (v) => v!.isEmpty ? "Required" : null,
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return "Required";
+                    final val = double.tryParse(v);
+                    if (val == null) return "Enter valid number";
+                    if (val < 4 || val > 10) return "Range: 4–10 hours";
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
 
@@ -439,6 +445,13 @@ class _PeriodInputScreenState extends State<PeriodInputScreen> {
                     labelText: "Daily Screen Time (1–10 hrs)",
                     border: OutlineInputBorder(),
                   ),
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return "Required";
+                    final val = double.tryParse(v);
+                    if (val == null) return "Enter valid number";
+                    if (val < 1 || val > 10) return "Range: 1–10 hours";
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
 
@@ -452,8 +465,9 @@ class _PeriodInputScreenState extends State<PeriodInputScreen> {
                   ),
                   validator: (v) {
                     if (v == null || v.isEmpty) return "Required";
-                    final val = int.tryParse(v);
+                    final val = double.tryParse(v);
                     if (val == null) return "Enter valid number";
+                    if (val < 20 || val > 200) return "Range: 20–200 unlocks";
                     return null;
                   },
                 ),
@@ -468,6 +482,13 @@ class _PeriodInputScreenState extends State<PeriodInputScreen> {
                     labelText: "Working Memory Score (20–80)",
                     border: OutlineInputBorder(),
                   ),
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return "Required";
+                    final val = double.tryParse(v);
+                    if (val == null) return "Enter valid number";
+                    if (val < 20 || val > 80) return "Range: 20–80 score";
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 32),
 
