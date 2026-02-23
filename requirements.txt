@@ -1,0 +1,21 @@
+# --- Core Frameworks ---
+django
+djangorestframework
+drf-yasg
+python-dotenv
+django-cors-headers
+
+# --- Machine Learning & Data Processing ---
+scikit-learn
+pandas
+numpy
+joblib
+tensorflow
+opencv-python
+cvzone
+
+# --- Standalone Predictor & Utilities ---
+flask
+matplotlib
+seaborn
+pillow
