@@ -655,17 +655,27 @@ def book_hospital_doctor_slot(request):
 def add_hospital_doctor_feedback(request):
     user_id = request.data.get('user')
     doctor_id = request.data.get('doctor')
+    booking_id = request.data.get('booking')
     rating = request.data.get('rating')
+    tension_free_level = request.data.get('tension_free_level', 0)
     comments = request.data.get('comments', '')
 
     try:
         user = Register.objects.get(id=user_id)
         doctor = tbl_hospital_doctor_register.objects.get(id=doctor_id)
-    except (Register.DoesNotExist, tbl_hospital_doctor_register.DoesNotExist):
-        return Response({'error': 'Invalid user or doctor ID'}, status=status.HTTP_404_NOT_FOUND)
+        booking = None
+        if booking_id:
+            booking = HospitalBooking.objects.get(id=booking_id)
+    except (Register.DoesNotExist, tbl_hospital_doctor_register.DoesNotExist, HospitalBooking.DoesNotExist):
+        return Response({'error': 'Invalid user, doctor, or booking ID'}, status=status.HTTP_404_NOT_FOUND)
 
     feedback = HospitalDoctorFeedback.objects.create(
-        user=user, doctor=doctor, rating=rating, comments=comments
+        user=user, 
+        doctor=doctor, 
+        booking=booking,
+        rating=rating, 
+        tension_free_level=tension_free_level,
+        comments=comments
     )
     serializer = HospitalDoctorFeedbackSerializer(feedback)
     return Response(serializer.data, status=status.HTTP_201_CREATED)

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:serene_space_project/patient_screen/home_screen.dart';
+import 'package:serene_space_project/patient_screen/feedback_form.dart';
 import 'package:serene_space_project/constant_uri.dart';
 
 class HosDoctorAppointmentsPages extends StatefulWidget {
@@ -232,6 +233,30 @@ Future<void> fetchClinBookings() async {
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
+                              const Spacer(),
+                              if ((appoint['status'] ?? 'booked').toLowerCase() == 'approved' || (appoint['status'] ?? 'booked').toLowerCase() == 'booked')
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => FeedbackFormScreen(
+                                          userId: widget.userId,
+                                          doctorId: appoint['doctor'],
+                                          bookingId: appoint['id'],
+                                          doctorName: appoint['doctor_name'],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF06857B),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  ),
+                                  child: const Text('Give Feedback', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                ),
                             ],
                           ),
                         ],

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:serene_space_project/constant_uri.dart';
+import 'package:serene_space_project/utils/app_theme.dart';
 
 class HospitalDoctorFeedbackPage extends StatefulWidget {
   final int doctorId;
@@ -115,16 +116,50 @@ String formatDate(String dateStr) {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          fb['user_name'] ?? 'Unknown User',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16,
-                            color: Color(0xFF18214A),
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              fb['user_name'] ?? 'Unknown User',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                                color: Color(0xFF18214A),
+                              ),
+                            ),
+                            if (fb['booking_date'] != null)
+                              Text(
+                                "Session: ${formatDate(fb['booking_date'])}",
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: SereneTheme.darkPink,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                          ],
                         ),
                         const SizedBox(height: 6),
-                        buildRatingStars(fb['rating'] ?? 0),
+                        Row(
+                          children: [
+                            buildRatingStars(fb['rating'] ?? 0),
+                            const Spacer(),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: SereneTheme.lightPink.withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                "Tension-Free: ${fb['tension_free_level']}/10",
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: SereneTheme.darkPink,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 10),
                         Text(
                           fb['comments'] ?? '',
@@ -135,9 +170,9 @@ String formatDate(String dateStr) {
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          formatDate(fb['created_at'] ?? ''),
+                          "Submitted on: ${fb['created_at'] != null ? DateFormat('dd-MM-yyyy HH:mm').format(DateTime.parse(fb['created_at'])) : 'N/A'}",
                           style: const TextStyle(
-                            fontSize: 13,
+                            fontSize: 11,
                             color: Color(0xFF8898AD),
                           ),
                         ),

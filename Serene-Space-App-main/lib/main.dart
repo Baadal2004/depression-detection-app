@@ -11,8 +11,11 @@ import 'package:serene_space_project/patient_screen/list_nearbyhos_doc/bloc/list
 import 'package:serene_space_project/patient_screen/pcod_prediction/input_condition_datas.dart/bloc/input_condition_bloc.dart';
 import 'package:serene_space_project/screens/menstrual_track/input_cycle/bloc/input_cycle_bloc.dart';
 import 'package:serene_space_project/utils/app_theme.dart';
+import 'package:serene_space_project/utils/notification_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService.init();
   runApp(const MyApp());
 }
 

@@ -11,7 +11,9 @@ import 'package:serene_space_project/patient_screen/videos/videos.dart';
 import 'package:serene_space_project/patient_screen/view_books/view_book.dart';
 import 'package:serene_space_project/patient_screen/view_my_hosbooking.dart';
 import 'package:serene_space_project/screens/chatbot/chatbot.dart';
+import 'package:serene_space_project/patient_screen/notification_history.dart';
 import 'package:serene_space_project/screens/menstrual_track/input_cycle/input_cycle_view.dart';
+import 'package:serene_space_project/screens/menstrual_track/input_cycle/habit_tracker_screen.dart';
 import 'package:serene_space_project/screens/emotion_detection_view.dart';
 import 'package:serene_space_project/utils/app_theme.dart';
 import 'package:typewritertext/typewritertext.dart';
@@ -284,7 +286,21 @@ class _HomeScreenState extends State<HomeScreen>
                   color: SereneTheme.darkPink,
                 ),
               ),
-              trailing: Image.asset('assets/images/mental-health-logo.jpg'),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => NotificationHistoryScreen(userId: userId!)),
+                      );
+                    },
+                    icon: const Icon(Icons.notifications_active_outlined, color: SereneTheme.darkPink),
+                  ),
+                  Image.asset('assets/images/mental-health-logo.jpg'),
+                ],
+              ),
             ),
           ),
           child: SafeArea(
@@ -517,7 +533,7 @@ class _HomeScreenState extends State<HomeScreen>
                   title: "Health Do's & Don'ts",
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => PeriodsDoDontsApp(userId: userId!)),
+                    MaterialPageRoute(builder: (_) => MentalHealthWellnessApp(userId: userId!)),
                   ),
                 ),
                 _drawerTile(
@@ -526,6 +542,14 @@ class _HomeScreenState extends State<HomeScreen>
                   onTap: () {
                     // Placeholder for support
                   },
+                ),
+                _drawerTile(
+                  icon: Icons.rate_review_rounded,
+                  title: "Feedback",
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => HosDoctorAppointmentsPages(userId: userId!)),
+                  ),
                 ),
               ],
             ),

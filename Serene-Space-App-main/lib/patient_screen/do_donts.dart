@@ -1,80 +1,75 @@
 // Beautiful & elegant Flutter UI for:
-// ✔ Do’s & Don’ts about Periods
-// ✔ Period Products (Pads, Tampons, Cups, Pain Relief, etc.)
+// ✔ Do’s & Don’ts about ADHD & Depression
+// ✔ Wellness Tools (Journaling, White Noise, etc.)
 // Add: url_launcher: ^6.1.7 to pubspec.yaml
 
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:serene_space_project/patient_screen/home_screen.dart';
 
-class PeriodsDoDontsApp extends StatelessWidget {
+class MentalHealthWellnessApp extends StatelessWidget {
   final List<Map<String, String>> dos = [
     {
-      'title': 'Stay Hydrated',
-      'desc': 'Drink plenty of water to reduce bloating and fatigue.',
+      'title': 'Practice Mindfulness',
+      'desc': 'Spend 10 minutes daily in meditation to calm your mind.',
     },
     {
-      'title': 'Use Heat Pads',
-      'desc': 'A warm compress helps relieve stomach and back pain.',
+      'title': 'Maintain a Routine',
+      'desc': 'A consistent schedule helps manage ADHD symptoms effectively.',
     },
     {
-      'title': 'Eat Iron-rich Foods',
-      'desc': 'Include spinach, beetroot, dates, and nuts to maintain energy.',
+      'title': 'Regular Exercise',
+      'desc': 'Physical activity releases endorphins that improve mood.',
     },
     {
-      'title': 'Take Proper Rest',
-      'desc': 'Your body needs extra rest during menstruation.',
+      'title': 'Healthy Sleep Hygiene',
+      'desc': 'Stick to a regular sleep schedule for better mental clarity.',
     },
   ];
 
   final List<Map<String, String>> donts = [
     {
-      'title': 'Avoid Junk Food',
-      'desc': 'Oily and spicy foods can worsen cramps and bloating.',
+      'title': 'Do Not Isolate Yourself',
+      'desc': 'Reach out to friends or family when you feel low.',
     },
     {
-      'title': 'Do Not Skip Meals',
-      'desc': 'Skipping food may cause weakness and dizziness.',
+      'title': 'Don\'t Skip Medication',
+      'desc': 'Always follow your prescribed treatment plan consistently.',
     },
     {
-      'title': 'Avoid Heavy Workouts',
-      'desc': 'Mild stretching is fine; heavy lifting increases discomfort.',
+      'title': 'Avoid Excessive Caffeine',
+      'desc': 'Too much caffeine can increase anxiety and restlessness.',
     },
     {
-      'title': 'Avoid Excess Sugar',
-      'desc': 'Sugar can trigger mood swings and acne flare-ups.',
+      'title': 'Avoid Negative Self-Talk',
+      'desc': 'Be kind to yourself; mental health recovery takes time.',
     },
   ];
 
   final List<Map<String, String>> products = [
     {
-      'title': 'Sanitary Pads',
-      'desc': 'Most commonly used; comfortable and safe for beginners.',
-      'icon': '🩸',
+      'title': 'Journaling Apps',
+      'desc': 'Track your moods and thoughts daily.',
+      'icon': '📝',
     },
     {
-      'title': 'Tampons',
-      'desc': 'Inserted product; comfortable for sports and swimming.',
-      'icon': '✨',
+      'title': 'White Noise Machine',
+      'desc': 'Helps focus by blocking distracting background noises.',
+      'icon': '🔊',
     },
     {
-      'title': 'Menstrual Cups',
-      'desc': 'Eco‑friendly, reusable, and lasts up to 10 years.',
-      'icon': '🌸',
+      'title': 'Stress Relief Balls',
+      'desc': 'Great for managing restlessness and anxiety.',
+      'icon': '🎾',
     },
     {
-      'title': 'Period Panties',
-      'desc': 'Leak-proof underwear suitable for night use.',
-      'icon': '🩲',
-    },
-    {
-      'title': 'Pain Relief Roll-ons',
-      'desc': 'Useful to relieve cramps naturally.',
-      'icon': '🌿',
+      'title': 'Weighted Blankets',
+      'desc': 'Provides a sense of security and improves sleep quality.',
+      'icon': '🛌',
     },
   ];
 
-  PeriodsDoDontsApp({super.key,required this.userId});
+  MentalHealthWellnessApp({super.key, required this.userId});
   final int userId;
 
   @override
@@ -91,7 +86,7 @@ class PeriodsDoDontsApp extends StatelessWidget {
               child: ListView(
                 padding: EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                 children: [
-                  sectionTitle('Do’s During Periods'),
+                  sectionTitle('Mental Health Do’s'),
                   SizedBox(height: 10),
                   ...dos.map(
                     (d) => GlassCard(
@@ -105,7 +100,7 @@ class PeriodsDoDontsApp extends StatelessWidget {
                   ),
 
                   SizedBox(height: 25),
-                  sectionTitle('Don’ts During Periods'),
+                  sectionTitle('Mental Health Don’ts'),
                   SizedBox(height: 10),
                   ...donts.map(
                     (d) => GlassCard(
@@ -119,7 +114,7 @@ class PeriodsDoDontsApp extends StatelessWidget {
                   ),
 
                   SizedBox(height: 25),
-                  sectionTitle('Period Products'),
+                  sectionTitle('Supportive Tools'),
                   SizedBox(height: 10),
                   ...products.map((p) => GlassCard(child: productTile(p))),
 
@@ -135,23 +130,22 @@ class PeriodsDoDontsApp extends StatelessWidget {
 
   Widget buildHeader(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [Color(0xFFFFA3C3), Color(0xFFFF5F9C)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.only(
+        borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(30),
           bottomRight: Radius.circular(30),
         ),
         boxShadow: [
           BoxShadow(
-            // ignore: deprecated_member_use
             color: Colors.pink.withOpacity(0.3),
             blurRadius: 20,
-            offset: Offset(0, 10),
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -159,29 +153,20 @@ class PeriodsDoDontsApp extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 34,
-            // ignore: deprecated_member_use
             backgroundColor: Colors.white.withOpacity(0.25),
             child: IconButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) {
-                      return HomeScreen(userId: userId);
-                    },
-                  ),
-                );
+                Navigator.pop(context);
               },
-              icon: Icon(Icons.favorite, size: 36, color: Colors.white),
+              icon: const Icon(Icons.arrow_back_rounded, size: 36, color: Colors.white),
             ),
-            //
           ),
-          SizedBox(width: 16),
-          Column(
+          const SizedBox(width: 16),
+          const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Periods Wellness Guide',
+                'Mental Health Guide',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -189,8 +174,10 @@ class PeriodsDoDontsApp extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 6),
-              // Text('Know what to do, avoid & best products',
-              //     style: TextStyle(color: Colors.white.withOpacity(0.9))),
+              Text(
+                'ADHD & Depression Support',
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+              ),
             ],
           ),
         ],

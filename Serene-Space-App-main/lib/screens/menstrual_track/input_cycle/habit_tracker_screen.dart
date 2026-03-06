@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:serene_space_project/utils/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:serene_space_project/utils/notification_service.dart';
 
 class HabitTrackerScreen extends StatefulWidget {
   final bool isAdhdDetected; // To show relevant suggestions
@@ -20,6 +21,8 @@ class HabitTrackerScreen extends StatefulWidget {
 class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
   List<Map<String, dynamic>> habits = [];
   final TextEditingController _habitController = TextEditingController();
+  final TextEditingController _intervalController = TextEditingController();
+  bool _isNotify = false;
 
   @override
   void initState() {
@@ -39,14 +42,14 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
       // Default habits based on ADHD detection
       if (widget.isAdhdDetected) {
         habits = [
-          {'title': 'Meditate for 10 mins', 'isCompleted': false},
-          {'title': 'Drink 8 glasses of water', 'isCompleted': false},
-          {'title': 'No screen time 1h before bed', 'isCompleted': false},
+          {'title': 'Meditate for 10 mins', 'isCompleted': false, 'interval': 0, 'isNotify': false},
+          {'title': 'Drink 8 glasses of water', 'isCompleted': false, 'interval': 60, 'isNotify': true},
+          {'title': 'No screen time 1h before bed', 'isCompleted': false, 'interval': 0, 'isNotify': false},
         ];
       } else {
         habits = [
-          {'title': 'Read for 15 mins', 'isCompleted': false},
-          {'title': 'Go for a walk', 'isCompleted': false},
+          {'title': 'Read for 15 mins', 'isCompleted': false, 'interval': 0, 'isNotify': false},
+          {'title': 'Go for a walk', 'isCompleted': false, 'interval': 0, 'isNotify': false},
         ];
       }
       _saveHabits();
@@ -62,13 +65,39 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
   // Add a new habit
   void _addHabit() {
     if (_habitController.text.isNotEmpty) {
+      final int interval = int.tryParse(_intervalController.text) ?? 0;
+      final newHabit = {
+        'title': _habitController.text,
+        'isCompleted': false,
+        'interval': interval,
+        'isNotify': _isNotify,
+      };
+      
       setState(() {
-        habits.add({'title': _habitController.text, 'isCompleted': false});
+        habits.add(newHabit);
         _habitController.clear();
+        _intervalController.clear();
+        _isNotify = false;
       });
       _saveHabits();
+      
+      if (newHabit['isNotify'] == true && interval > 0) {
+        _scheduleNotification(habits.length - 1);
+      }
+      
       Navigator.pop(context);
     }
+  }
+
+  void _scheduleNotification(int index) {
+    final habit = habits[index];
+    debugPrint('Scheduling notification for: ${habit['title']} at ${habit['interval']} mins');
+    NotificationService.schedulePeriodicNotification(
+      id: widget.userId + index, // Simple unique ID
+      title: 'Time for ${habit['title']}!',
+      body: 'Stay on track with your habit tracker.',
+      intervalInMinutes: habit['interval'],
+    );
   }
 
   // Toggle habit completion
@@ -81,6 +110,9 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
 
   // Delete a habit
   void _deleteHabit(int index) {
+    if (habits[index]['isNotify'] == true) {
+      NotificationService.cancelNotification(widget.userId + index);
+    }
     setState(() {
       habits.removeAt(index);
     });
@@ -89,25 +121,51 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
 
   // Show "Add Habit" dialog
   void _showAddHabitDialog() {
+    _isNotify = false;
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text("Add New Habit"),
-          content: TextField(
-            controller: _habitController,
-            decoration: const InputDecoration(hintText: "Enter habit name"),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: _addHabit,
-              child: const Text("Add"),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text("Add New Habit"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: _habitController,
+                    decoration: const InputDecoration(hintText: "Enter habit name"),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: _intervalController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(hintText: "Interval in minutes (0 for no reminder)"),
+                  ),
+                  const SizedBox(height: 10),
+                  CheckboxListTile(
+                    title: const Text("Enable Reminder"),
+                    value: _isNotify,
+                    onChanged: (val) {
+                      setDialogState(() {
+                        _isNotify = val ?? false;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  onPressed: _addHabit,
+                  child: const Text("Add"),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -156,9 +214,23 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
                     color: SereneTheme.darkPink,
                   ),
                 ),
-                IconButton(
-                  onPressed: _showAddHabitDialog,
-                  icon: const Icon(Icons.add_circle, color: SereneTheme.primaryPink, size: 30),
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        NotificationService.showInstantNotification(
+                          id: 999,
+                          title: "Test Notification",
+                          body: "If you see this, notifications are working!",
+                        );
+                      },
+                      icon: const Icon(Icons.bug_report, color: Colors.blue),
+                    ),
+                    IconButton(
+                      onPressed: _showAddHabitDialog,
+                      icon: const Icon(Icons.add_circle, color: SereneTheme.primaryPink, size: 30),
+                    ),
+                  ],
                 ),
               ],
             ),
