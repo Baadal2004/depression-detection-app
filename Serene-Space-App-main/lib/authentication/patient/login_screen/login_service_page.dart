@@ -34,12 +34,12 @@ Future<UserLoginModel> userLogins({
   //  print("Request body: ${jsonEncode(body)}");
    // print("Response status: ${res.statusCode}");
     final Map<String, dynamic> decoded = jsonDecode(res.body);
-
     if (res.statusCode == 200) {
       final response = UserLoginModel.fromJson(decoded);
       return response;
     } else {
-      throw Exception("Failed to login User ${res.statusCode}");
+      final message = decoded['message'] ?? decoded['error'] ?? "Failed to login";
+      throw Exception(message);
     }
   } on SocketException {
     throw Exception('Server Error');

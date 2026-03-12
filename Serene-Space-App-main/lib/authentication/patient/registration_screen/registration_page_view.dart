@@ -23,19 +23,16 @@ class _RegistrationPageState extends State<RegistrationPage>
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController ageController =
-      TextEditingController(); // New controller for Age
+  final TextEditingController ageController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
-  final TextEditingController phoneController =
-      TextEditingController(); // New controller for Place
-  final TextEditingController placeController =
-      TextEditingController(); // New controller for Place
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController placeController = TextEditingController();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool isloading = false;
+  bool _isPasswordVisible = false;
   double? latitude;
   double? longitude;
-  get loadFromJson => null;
 
   @override
   void initState() {
@@ -52,9 +49,9 @@ class _RegistrationPageState extends State<RegistrationPage>
     nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
-    ageController.dispose(); // Dispose new controller
+    ageController.dispose();
     addressController.dispose();
-    phoneController.dispose(); // No longer needed for direct use
+    phoneController.dispose();
     placeController.dispose();
     super.dispose();
   }
@@ -123,47 +120,45 @@ class _RegistrationPageState extends State<RegistrationPage>
   }
 
   Future<void> saveForm() async {
-    print(123);
     FocusScope.of(context).unfocus();
     setState(() {
       isloading = true;
     });
     final form = _formKey.currentState;
     if (form == null || !form.validate()) {
+      setState(() {
+        isloading = false;
+      });
       return;
     }
-    setState(() {
-      isloading = true;
-    });
-    print('after validation');
 
-    print('Validation successful. Dispatching RegisterBlocEvent.');
-    context.read<RegistrationPageBloc>().add(
-      RegistrationPageEvent.patientRegistration(
-        name: nameController.text,
-        password: passwordController.text,
-        email: emailController.text,
-        phone: int.parse(phoneController.text),
-        address: addressController.text,
-        place: placeController.text,
-        age: int.parse(ageController.text),
-        role: 'user',
-        longitude: double.parse(
-          longitude!.toStringAsFixed(6),
-        ), // Limit to 6 decimal places
-        latitude: double.parse(latitude!.toStringAsFixed(6)),
-      ),
-    );
-    // context.read<RegisterBlocBloc>().add(
-    //   RegisterBlocEvent.userRegister(
-    //     name: nameController.text,
-    //     email: emailController.text.trim(),
-    //     password: passwordController.text.trim(),
-    //     age: ageController.text, // Pass age
-    //     address: addressController.text,
-    //     phone: phoneController.text,
-    //   ),
-    // );
+    try {
+      if (latitude == null || longitude == null) {
+        showError("Please fetch your location first");
+        setState(() => isloading = false);
+        return;
+      }
+      
+      context.read<RegistrationPageBloc>().add(
+            RegistrationPageEvent.patientRegistration(
+              name: nameController.text,
+              password: passwordController.text,
+              email: emailController.text,
+              phone: int.parse(phoneController.text),
+              address: addressController.text,
+              place: placeController.text,
+              age: int.parse(ageController.text),
+              role: 'user',
+              longitude: double.parse(longitude!.toStringAsFixed(6)),
+              latitude: double.parse(latitude!.toStringAsFixed(6)),
+            ),
+          );
+    } catch (e) {
+      setState(() {
+        isloading = false;
+      });
+      showError("Error: $e");
+    }
   }
 
   Widget _buildTextField(
@@ -172,19 +167,21 @@ class _RegistrationPageState extends State<RegistrationPage>
     required String? Function(String?)? validator,
     TextInputType keyboardType = TextInputType.text,
     int? maxLines,
-    bool obscureText = false, // Added for password
+    bool? obscureText,
+    Widget? suffixIcon,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: TextFormField(
-        maxLines: maxLines ?? 1, // Use maxLines if provided, otherwise 1
+        maxLines: maxLines ?? 1,
         controller: controller,
         validator: validator,
         keyboardType: keyboardType,
-        obscureText: obscureText,
+        obscureText: obscureText ?? (label.toLowerCase().contains('password')),
         decoration: InputDecoration(
           labelText: label,
           labelStyle: const TextStyle(color: Colors.black),
+          suffixIcon: suffixIcon,
           border: AnimatedInputBorder(
             animationValue: _animationController.value,
           ),
@@ -201,7 +198,6 @@ class _RegistrationPageState extends State<RegistrationPage>
   @override
   Widget build(BuildContext context) {
     double h = MediaQuery.of(context).size.height;
-    double w = MediaQuery.of(context).size.width;
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -237,7 +233,7 @@ class _RegistrationPageState extends State<RegistrationPage>
                     backgroundColor: Colors.green,
                   ),
                 );
-                Navigator.of(context).push(
+                Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
                     builder: (context) {
                       return const LoginScreen();
@@ -272,8 +268,6 @@ class _RegistrationPageState extends State<RegistrationPage>
               child: Center(
                 child: Card(
                   elevation: 6,
-                  // semanticContainer: true,
-                  borderOnForeground: true,
                   shadowColor: Colors.black,
                   margin: const EdgeInsets.all(16),
                   shape: RoundedRectangleBorder(
@@ -302,7 +296,7 @@ class _RegistrationPageState extends State<RegistrationPage>
                                       ? "Please enter name"
                                       : null,
                                 ),
-                                const SizedBox(height: 10), // Reduced spacing
+                                const SizedBox(height: 10),
                                 _buildTextField(
                                   "Email",
                                   controller: emailController,
@@ -320,12 +314,23 @@ class _RegistrationPageState extends State<RegistrationPage>
                                     return null;
                                   },
                                 ),
-                                const SizedBox(height: 10), // Reduced spacing
+                                const SizedBox(height: 10),
                                 _buildTextField(
                                   "Password",
                                   controller: passwordController,
                                   keyboardType: TextInputType.visiblePassword,
-                                  obscureText: true, // Make password obscure
+                                  obscureText: !_isPasswordVisible,
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                                      color: Colors.black54,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _isPasswordVisible = !_isPasswordVisible;
+                                      });
+                                    },
+                                  ),
                                   validator: (value) {
                                     if (value!.isEmpty) {
                                       return "Please enter password";
@@ -336,12 +341,11 @@ class _RegistrationPageState extends State<RegistrationPage>
                                     return null;
                                   },
                                 ),
-                                const SizedBox(height: 10), // Reduced spacing
+                                const SizedBox(height: 10),
                                 _buildTextField(
                                   "Age",
                                   controller: ageController,
-                                  keyboardType: TextInputType
-                                      .number, // Age should be a number
+                                  keyboardType: TextInputType.number,
                                   validator: (value) {
                                     if (value!.isEmpty) {
                                       return "Please enter your age";
@@ -357,20 +361,18 @@ class _RegistrationPageState extends State<RegistrationPage>
                                 _buildTextField(
                                   "Phone Number",
                                   controller: phoneController,
-                                  keyboardType: TextInputType
-                                      .phone, // Age should be a number
+                                  keyboardType: TextInputType.phone,
                                   validator: (value) {
                                     if (value!.isEmpty) {
                                       return "Please enter your Phone Number";
                                     }
-                                    if (int.tryParse(value) == null ||
-                                        int.parse(value) <= 0) {
-                                      return "Please enter a valid age";
+                                    if (int.tryParse(value) == null) {
+                                      return "Please enter a valid number";
                                     }
                                     return null;
                                   },
                                 ),
-                                const SizedBox(height: 10), // Reduced spacing
+                                const SizedBox(height: 10),
                                 _buildTextField(
                                   "Address",
                                   maxLines: 3,
@@ -379,8 +381,8 @@ class _RegistrationPageState extends State<RegistrationPage>
                                   validator: (value) => value!.isEmpty
                                       ? "Please enter address"
                                       : null,
-                                ), 
-                                 const SizedBox(height: 10), // Reduced spacing
+                                ),
+                                const SizedBox(height: 10),
                                 _buildTextField(
                                   "Place",
                                   controller: placeController,
@@ -389,13 +391,12 @@ class _RegistrationPageState extends State<RegistrationPage>
                                       : null,
                                 ),
                                 const SizedBox(height: 10),
-                                Align(
+                                const Align(
                                   alignment: Alignment.centerLeft,
                                   child: Text('Get Location'),
                                 ),
                                 const SizedBox(height: 10),
                                 buildLocationButton(),
-
                                 const SizedBox(height: 20),
                                 ElevatedButton(
                                   onPressed: saveForm,

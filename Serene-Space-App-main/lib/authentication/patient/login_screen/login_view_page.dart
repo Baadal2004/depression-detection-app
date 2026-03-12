@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:serene_space_project/authentication/patient/login_screen/bloc/login_screen_bloc.dart';
+import 'package:serene_space_project/authentication/patient/login_screen/login_service_page.dart';
 import 'package:serene_space_project/authentication/patient/registration_screen/registration_page_view.dart';
 import 'package:serene_space_project/other_screen/role_wise.dart';
 import 'package:serene_space_project/patient_screen/home_screen.dart';
@@ -24,10 +25,14 @@ class _LoginScreenState extends State<LoginScreen>
   final TextEditingController passController = TextEditingController();
   late AnimationController _animationController;
   bool isloading = false;
+  final GlobalKey<FormState> _fromKey = GlobalKey<FormState>();
+  bool _isPasswordVisible = false;
+  String? _emailExistenceError;
+  final FocusNode _emailFocusNode = FocusNode();
   final String _selectedUserType = 'user';
   int? userId;
   String? name;
-  final GlobalKey<FormState> _fromKey = GlobalKey<FormState>();
+
   @override
   void initState() {
     super.initState();
@@ -35,6 +40,66 @@ class _LoginScreenState extends State<LoginScreen>
       vsync: this,
       duration: const Duration(milliseconds: 2000),
     )..forward();
+    _emailFocusNode.addListener(_onEmailFocusChange);
+  }
+
+  void _onEmailFocusChange() {
+    if (!_emailFocusNode.hasFocus) {
+      _checkEmailExistence();
+    }
+  }
+
+  Future<void> _checkEmailExistence() async {
+    final email = emailController.text.trim();
+    if (email.isEmpty) {
+      if (mounted) {
+        setState(() => _emailExistenceError = null);
+      }
+      return;
+    }
+
+    try {
+      // Calling login with a dummy password to check existence.
+      // If the error is specific to 'not found', we show the warning.
+      await userLogins(
+        role: _selectedUserType,
+        email: email,
+        password: "DUMMY_PASSWORD_CHECK_EXISTENCE",
+      );
+      // If by some miracle it succeeds, we clear the error.
+      if (mounted) {
+        setState(() => _emailExistenceError = null);
+      }
+    } catch (e) {
+      final errorMsg = e.toString().toLowerCase();
+      // Check for common 'user not found' messages. 
+      // Based on user feedback, 'password is incorrect' means user EXISTS.
+      // So if it's NOT 'password is incorrect' and suggests registration:
+      if (errorMsg.contains('not found') || 
+          errorMsg.contains('no user') || 
+          errorMsg.contains('register') || 
+          errorMsg.contains('invalid email')) {
+        if (mounted) {
+          setState(() {
+            _emailExistenceError = "username not available please register";
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() => _emailExistenceError = null);
+        }
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailFocusNode.removeListener(_onEmailFocusChange);
+    _emailFocusNode.dispose();
+    _animationController.dispose();
+    emailController.dispose();
+    passController.dispose();
+    super.dispose();
   }
 
   Future<void> loginState() async {
@@ -105,47 +170,66 @@ class _LoginScreenState extends State<LoginScreen>
     required TextEditingController controller,
     required String? Function(String?)? validator,
     TextInputType keyboardType = TextInputType.text,
+    FocusNode? focusNode,
+    Widget? suffixIcon,
+    bool? obscureText,
+    String? errorText,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: SereneTheme.primaryPink.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: TextFormField(
-        controller: controller,
-        validator: validator,
-        keyboardType: keyboardType,
-        obscureText: label.toLowerCase().contains('password'),
-        style: const TextStyle(fontWeight: FontWeight.w600, color: SereneTheme.darkPink),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: TextStyle(color: Colors.pink.shade200, fontWeight: FontWeight.w500),
-          prefixIcon: Icon(
-            label.toLowerCase().contains('email') ? Icons.email_rounded : Icons.lock_rounded,
-            color: SereneTheme.primaryPink.withOpacity(0.6),
-          ),
-          border: OutlineInputBorder(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
             borderRadius: BorderRadius.circular(15),
-            borderSide: BorderSide.none,
+            boxShadow: [
+              BoxShadow(
+                color: SereneTheme.primaryPink.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-            borderSide: BorderSide(color: SereneTheme.primaryPink.withOpacity(0.1), width: 1.5),
+          child: TextFormField(
+            controller: controller,
+            validator: validator,
+            focusNode: focusNode,
+            keyboardType: keyboardType,
+            obscureText: obscureText ?? label.toLowerCase().contains('password'),
+            style: const TextStyle(fontWeight: FontWeight.w600, color: SereneTheme.darkPink),
+            decoration: InputDecoration(
+              labelText: label,
+              labelStyle: TextStyle(color: Colors.pink.shade200, fontWeight: FontWeight.w500),
+              prefixIcon: Icon(
+                label.toLowerCase().contains('email') ? Icons.email_rounded : Icons.lock_rounded,
+                color: SereneTheme.primaryPink.withOpacity(0.6),
+              ),
+              suffixIcon: suffixIcon,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide(color: SereneTheme.primaryPink.withOpacity(0.1), width: 1.5),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: const BorderSide(color: SereneTheme.primaryPink, width: 2),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            ),
           ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-            borderSide: const BorderSide(color: SereneTheme.primaryPink, width: 2),
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         ),
-      ),
+        if (errorText != null)
+          Padding(
+            padding: const EdgeInsets.only(left: 12, top: 4),
+            child: Text(
+              errorText,
+              style: const TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.w500),
+            ),
+          ),
+      ],
     );
   }
 
@@ -337,32 +421,46 @@ class _LoginScreenState extends State<LoginScreen>
                           animation: _animationController,
                           builder: (context, child) => Form(
                             key: _fromKey,
-                            child: Column(
-                              children: [
-                                _buildTextField(
-                                  "Email Address",
-                                  keyboardType: TextInputType.emailAddress,
-                                  controller: emailController,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return "We need your email to start!";
-                                    }
-                                    return null;
-                                  },
+                                child: Column(
+                                  children: [
+                                    _buildTextField(
+                                      "Email Address",
+                                      keyboardType: TextInputType.emailAddress,
+                                      controller: emailController,
+                                      focusNode: _emailFocusNode,
+                                      errorText: _emailExistenceError,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return "We need your email to start!";
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    const SizedBox(height: 16),
+                                    _buildTextField(
+                                      "Password",
+                                      controller: passController,
+                                      obscureText: !_isPasswordVisible,
+                                      suffixIcon: IconButton(
+                                        icon: Icon(
+                                          _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                                          color: SereneTheme.primaryPink.withOpacity(0.6),
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                            _isPasswordVisible = !_isPasswordVisible;
+                                          });
+                                        },
+                                      ),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return "Please enter your password";
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(height: 16),
-                                _buildTextField(
-                                  "Password",
-                                  controller: passController,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return "Please enter your password";
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ],
-                            ),
                           ),
                         ).animate().fadeIn(delay: 400.ms),
 
